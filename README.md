@@ -1,5 +1,11 @@
 # SMOL
 
+SMOL uses...
+- Symmetric-Key Encryption
+- Memory-Efficient Noncing
+- Obfuscated Length
+- Lossless Compression
+
 (NOTE: This is in beta, and further backwards-compatibility-breaking changes will be made to the protocol.)
 
 A dictionary-compression and symmetric-key encryption algorithm for compressing and encrypting English text. Its purpose is for use in applications where storage is a constraint, such as blockchain-based social media (e.g. memo.cash), and also where an optional feature to encrypt the contents to only show them to certain peers may be desired.
