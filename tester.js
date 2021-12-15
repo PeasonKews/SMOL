@@ -1,4 +1,122 @@
+let message = "Hello world";
+message = "A purely peer-to-peer version of electronic cash would allow online payments to be sent directly from one party to another without going through a financial institution. Digital signatures provide part of the solution, but the main benefits are lost if a trusted third party is still required to prevent double-spending. We propose a solution to the double-spending problem using a peer-to-peer network. The network timestamps transactions by hashing them into an ongoing chain of hash-based proof-of-work, forming a record that cannot be changed without redoing the proof-of-work. The longest chain not only serves as proof of the sequence of events witnessed, but proof that it came from the largest pool of CPU power. As long as a majority of CPU power is controlled by nodes that are not cooperating to attack the network, they'll generate the longest chain and outpace attackers. The network itself requires minimal structure. Messages are broadcast on a best effort basis, and nodes can leave and rejoin the network at will, accepting the longest proof-of-work chain as proof of what happened while they were gone."
+//message = "Hello there";
+let pass = "password";
 
+//console.time("Compressed and Encrypted");
+let ciphertext = SMOL(message, 1, pass, 0);
+//console.timeEnd("Compressed and Encrypted");
+
+//console.time("Decompressed and Decrypted");
+let plaintext = SMOL(ciphertext, -1, pass, 0);
+//console.timeEnd("Decompressed and Decrypted");
+//console.log("\n");
+
+console.time("compressed");
+  let compressedTest = compress(message);
+console.timeEnd("compressed");
+
+console.time("decompressed");
+  let decompressedTest = decompress(compressedTest);
+console.timeEnd("decompressed");
+
+console.time("encrypted");
+  let encryptedTest = encrypt(compressedTest, "password", 0);
+console.timeEnd("encrypted");
+
+console.time("decrypted");
+  let decryptedTest = decrypt(encryptedTest, "password", 0);
+console.timeEnd("decrypted");
+
+//console.log("message:    ", message);
+//console.log("compressed: ", dictionaryCompression(message));
+console.log("ciphertext: ", ciphertext, ciphertext.length);
+console.log("Decrypted:  ", plaintext, plaintext.length);
+console.log("Successful: ", (message === plaintext));
+console.log("Bytes Saved:", Math.round((1-byteCount(ciphertext)/byteCount(plaintext))*100)+"%");
+
+
+/*//Using a bad password
+let badPass = "passwore";
+let sameBadPass = badPass;
+let botched1 = SMOL(ciphertext, -1, badPass, 0);
+let botched2 = SMOL(ciphertext, -1, sameBadPass, 0);
+console.log("\n"+botched1, "\n"+botched2);*/
+
+/*
+let bruteForce = "";
+let result = "";
+let bCounter = 0;
+while (result !== message && bCounter < 1000){
+  bCounter++;
+  bruteForce = generateText(pass.length);
+  result = SMOL(ciphertext, -1, bruteForce);
+};
+console.log("\n", result, bruteForce, bCounter);
+*/
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/*
 let uncompressedText = "A purely peer-to-peer version of electronic cash would allow online payments to be sent directly from one party to another without going through a financial institution. Digital signatures provide part of the solution, but the main benefits are lost if a trusted third party is still required to prevent double-spending. We propose a solution to the double-spending problem using a peer-to-peer network. The network timestamps transactions by hashing them into an ongoing chain of hash-based proof-of-work, forming a record that cannot be changed without redoing the proof-of-work. The longest chain not only serves as proof of the sequence of events witnessed, but proof that it came from the largest pool of CPU power. As long as a majority of CPU power is controlled by nodes that are not cooperating to attack the network, they'll generate the longest chain and outpace attackers. The network itself requires minimal structure. Messages are broadcast on a best effort basis, and nodes can leave and rejoin the network at will, accepting the longest proof-of-work chain as proof of what happened while they were gone.";
 
 //let uncompressedText = "Hello world";
@@ -63,4 +181,4 @@ console.log("Final Text & Bytes:    ", encryptedText, byteCount(encryptedText));
 console.log("Byte Compression:      ", Math.floor((1-byteCount(encryptedText) / byteCount(uncompressedText))*100)+"%");
 console.log("Valid Compression:     ", uncompressedText === decompressedText);
 console.log("Valid Decryption:      ", decryptedText === text);
-console.log("Self-Consistent:       ", validResult && botchedResult);
+console.log("Self-Consistent:       ", validResult && botchedResult);*/
