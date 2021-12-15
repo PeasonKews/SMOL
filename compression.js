@@ -1,8 +1,4 @@
 /*Dictionary Compression Algorithm: 
-https://miniwebtool.com/remove-spaces/
-https://url-decode.com/tool/create-array-js
-https://www.matthewb.id.au/csv/text-list-to-javascript-array.html
-https://www.browserling.com/tools/spaces-to-newlines
 */
 
 let spaceIndex = comms.length + base96.length - 2;
