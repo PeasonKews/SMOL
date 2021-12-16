@@ -5,7 +5,8 @@ let spaceIndex = comms.length + base96.length - 2;
 let noCapIndex = comms.indexOf("<~NOCAP~>");
 let capIndex = comms.indexOf("<~CAPITALIZE~>");
 let noSpaceIndex = comms.indexOf("<~NOSPACE~>");
-let preceding = comms.length+base96.length;
+let preceding = comms.length+base96.length+capitalizedEnglishWords.length;
+let preceding2 = preceding - capitalizedEnglishWords.length;
 
 function repeatCase(str, lim){
   let newStr = "";
@@ -21,6 +22,20 @@ function convertToBin(str){
   str = str.replaceAll("0", "<?>");
   str = str.replaceAll("1", "<!>");
   //
+  //Replace All-Capsed English Words With Binary Codes
+  let leadingSpace = false;
+  if (str.substring(0,1) === " ") leadingSpace = true;
+  for (let w = capitalizedEnglishWords.length - 2; w > 0; w--){
+    if (!str.includes(capitalizedEnglishWords[w])) continue;
+    str = str.replaceAll(" " + capitalizedEnglishWords[w], binary13[w+preceding2]);
+    str = str.replaceAll(capitalizedEnglishWords[w], 
+      binary13[noSpaceIndex]+binary13[w+preceding2]);
+    if (!leadingSpace && str.substring(0,13) === binary13[noSpaceIndex]) str = str.substring(13);
+    if (leadingSpace){
+    	str = binary13[spaceIndex]+str;
+    	leadingSpace = false;
+    };
+  };
   //Insert Capitalize Commands
   let capitalizedChar;
   str = ". " + str;
@@ -42,9 +57,8 @@ function convertToBin(str){
   };
   str = str.substring(2);
   
-  
   //Replace English Words With Binary Codes
-  let leadingSpace = false;
+  leadingSpace = false;
   if (str.substring(0,1) === " ") leadingSpace = true;
   for (let w = englishWords.length - 2; w > 0; w--){
     if (!str.includes(englishWords[w])) continue;
@@ -57,7 +71,7 @@ function convertToBin(str){
     };
   };
   
-  //Replace Chars With Binary Codes
+  //Replace Suffx With Binary Codes
   for (let i = 0; i < suffx.length; i++){
    if (!str.includes(suffx[i])) continue;
     str = str.replaceAll(suffx[i], binary13[preceding+englishWords.length+i]);
@@ -91,7 +105,8 @@ function convertToBase96(str){
       while (byte13.length < 13) byte13+= "0";
     };    
     ind = convBin2Index[byte13].index*1;
-    if (ind > preceding && ind < preceding + englishWords.length){
+    if ((ind > preceding && ind < preceding + englishWords.length) || 
+    ind > preceding2 && ind < preceding2 + capitalizedEnglishWords.length){
     newStr+= " " + convBin2Text[byte13].text;
     } else {
       newStr+= convBin2Text[byte13].text;
@@ -127,14 +142,30 @@ let newStr = "";
 let byte6 = "";
 let sub = "";
 
+/*
+//if (i+6 < str.length)
+  newStr = str;
+  while (newStr.length % 6 !== 0){
+    newStr+= "0";
+  };
+  let len = newStr.length;
+  let newStr2 = newStr;
+  newStr = "";
+  while (newStr2){
+    newStr+= newStr2.substring(0,6)+"<~REMOVE~>";
+    newStr2 = newStr2.replace(newStr2.substring(0,6)+"<~REMOVE~>","");
+  };
+  for (let c = 0; c < charArr.length; c++){
+    newStr.replaceAll(binary6[c], charArr[c]);
+  };
+  newStr = newStr.replaceAll("<~REMOVE~>", "");*/
+
   while (str){
     byte6 = "";
     byte6 = str.substring(0,6);
     str = str.replace(byte6, "");
-    if (byte6.length < 6){
-      while(byte6.length < 6){
-        byte6 = byte6 + "0";
-      };
+    while(byte6.length < 6){
+      byte6 = byte6 + "0";
     };
     for (let c = 0; c < charArr.length; c++){
       sub = byte6;
@@ -146,6 +177,7 @@ let sub = "";
       };
     };
   };
+  
   //Use the extra bytes
   for (let i = 10; i < 42; i++){
     newStr = newStr.replaceAll("0"+charArr[i], extraBytes[i-10]);
@@ -188,6 +220,40 @@ function decompress(str){
 
 function compress(str){
   str = convertToBin(str);
+  
+  /*//Test
+  let testStr = str;
+  console.log(testStr)
+  while (testStr){
+    console.log(testStr.substring(0,13), convBin2Text[testStr.substring(0,13)].text);
+    testStr = testStr.substring(13);
+  };
+  */
+
   str = convertToBase64(str);
   return str;
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
 };

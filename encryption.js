@@ -66,28 +66,6 @@ function unshuffle(text, key, arr){
   return text;
 };
 
-/*
-
-
-function rotateCharNegative(text, rotations, arr){
-  arr = reverseList(arr);
-  let max = arr.length - 1;
-  let textValue = (convChar2Index[text].index - rotations) % (max + 1);
-  return arr[textValue];
-};
-
-function totalValue(key, arr){
-  let max = arr.length - 1;
-  let value = 0;
-  for (let i = 0; i < key.length; i++){
-    value+= convChar2Index[key.substring(i,i+1)].index;
-  };
-  value = value + key.length;
-  return value % max;
-};
-
-*/
-
 function rotateCharPositive(text, rotations, arr){
   let max = arr.length - 1;
   let textValue = (convChar2Index[text].index + rotations) % (max + 1);
@@ -130,24 +108,21 @@ let newStr = "";
   return newStr;
 };
 
-
-function generateKey(len, key, arr){
+function generateKey(len, entropy, key, arr){
   let newKey = "";
   while(newKey.length < len*2){
-    newKey+= key;
+    newKey+= entropy;
   };
   newKey = newKey.substring(0,len*2);
   newKey = rotate(newKey, key, arr);
-  key = newKey.substring(0, key.length);
   newKey = shuffle(newKey, key, arr);
   newKey = combineBits(newKey, arr);
   return newKey;
 };
 
-
-function randomize(text, key, arr){
+function randomize(text, key, password, arr){
   let max = arr.length - 1;
-  key = generateKey(text.length, key, arr);
+  key = generateKey(text.length, key, password, arr);
   let temp = text.substring(0,1);
   let rotate = 0;
   let newText = "";
@@ -168,9 +143,9 @@ function reverseList(arr){
   return newArr;
 };
 
-function unrandomize(text, key, arr){
+function unrandomize(text, key, password, arr){
   let max = arr.length - 1;
-  key = generateKey(text.length, key, arr);
+  key = generateKey(text.length, key, password, arr);
   let rArr = reverseList(arr);
   let temp = text.substring(0,1);
   let rotate = 0;
@@ -179,14 +154,6 @@ function unrandomize(text, key, arr){
     rotate = arr.indexOf(key.substring(k-1, k));
       temp = text.substring(k-1, k);
       newText = newText + rArr[(convChar2IndexR[temp].index + rotate) % (max + 1)];
-  };
-  return newText;
-};
-
-function flip(text){
-  let newText = "";
-  for (let i = 0; i < text.length; i++){
-    newText+= text.substring(text.length-(1+i), text.length-i)
   };
   return newText;
 };
@@ -200,10 +167,10 @@ function encrypt(text, key, nSize){
     nonce+= arr[random(0, max)];
   };
   let text1 = randomize(text.substring(0,Math.ceil(text.length/2)),
-    text.substring(Math.ceil(text.length/2))+key+nonce,arr);
+    text.substring(Math.ceil(text.length/2))+key+nonce,key,arr);
   text = text1+text.substring(Math.ceil(text.length/2));
   let text2 = randomize(text.substring(Math.ceil(text.length/2)),
-    text.substring(0,Math.floor(text.length/2))+key+nonce,arr);
+    text.substring(0,Math.floor(text.length/2))+key+nonce,key,arr);
   text = text1+text2;
   text = nonce + text;
   text = shuffle(text,key+trueLen+1,arr);
@@ -217,10 +184,10 @@ function decrypt(text, key, nSize){
   let nonce = text.substring(0, nSize);
   text = text.substring(nSize);
   let text2 = unrandomize(text.substring(Math.ceil(text.length/2)),
-    text.substring(0,Math.floor(text.length/2))+key+nonce,arr);
+    text.substring(0,Math.floor(text.length/2))+key+nonce,key,arr);
   text = text.substring(0,Math.ceil(text.length/2))+text2;
   let text1 = unrandomize(text.substring(0,Math.ceil(text.length/2)),
-    text.substring(Math.ceil(text.length/2))+key+nonce,arr);
+    text.substring(Math.ceil(text.length/2))+key+nonce,key,arr);
   text = text1+text2;
   return text;
 };
