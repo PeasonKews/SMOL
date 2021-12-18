@@ -1,4 +1,9 @@
+/*
+Rotational Encryption Algorithm
+*/
 let chars = ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", "n", "o", "p", "q", "r", "s", "t", "u", "v", "w", "x", "y", "z", "A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z", "`", "~", "!", "@", "#", "$", "%", "^", "&", "*", "(", ")", "-", "_", "=", "+", "[", "{", "]", "}", "\\", "|", ";", ":", "'", "\"", ",", "<", ".", ">", "/", "?", " ", "	"];
+
+let max = chars.length;
 
 let charIndx = [];
 let charIndxR = [];
@@ -69,17 +74,15 @@ function unshuffle(text, key, arr){
 };
 
 function totalValue(key, arr){
-  let max = arr.length - 1;
   let value = 0;
   for (let i = 0; i < key.length; i++){
     value+= convChar2Index[key.substring(i,i+1)].index;
   };
   value = value + key.length;
-  return value % max;
+  return value % max + 1;
 };
 
 function rotate(text, key, arr){
-  let max = arr.length - 1;
   let temp = text.substring(0,1);
   let rotate; 
   let newText = "";
@@ -88,13 +91,12 @@ function rotate(text, key, arr){
       rotate = convChar2Index[key.substring(t % key.length, (t+1) % 
         key.length).substring(0,1)].index + 1;
       temp = text.substring(t, t+1);
-      newText = newText + arr[((convChar2Index[temp].index + (rotate*t*tv)) % (max + 1))];
+      newText = newText + arr[((convChar2Index[temp].index + (rotate*(t+1)*tv)) % max)];
     };
   return newText;
 };
 
 function unrotate(text, key, arr){
-  let max = arr.length - 1;
   let temp = text.substring(0,1);
   let rotate;
   let newText = "";
@@ -104,7 +106,7 @@ function unrotate(text, key, arr){
           key.length).substring(0,1)].index + 1;
       temp = text.substring(t, t+1);
       newText = newText + arr[arr.length - 1 - 
-        ((convChar2IndexR[temp].index + (rotate*t*tv)) % (max+1))];
+        ((convChar2IndexR[temp].index + (rotate*(t+1)*tv)) % max)];
     };
   return newText;
 };
@@ -112,9 +114,8 @@ function unrotate(text, key, arr){
 function encrypt(text, key, nSize){
   let nonce = "";
   let arr = chars;
-  let max = arr.length - 1;
   for (let i = 0; i < nSize; i++){
-    nonce+= arr[random(0, max)];
+    nonce+= arr[random(0, max-1)];
   };
   let nKey = nonce + key + "";
   text = rotate(text, nKey, arr);
