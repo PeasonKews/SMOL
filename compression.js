@@ -19,8 +19,8 @@ function repeatCase(str, lim){
 //Compress Base96
 function convertToBin(str){
   //Hide 0s and 1s
-  str = str.replaceAll("0", "<?>");
-  str = str.replaceAll("1", "<!>");
+  str = str.replaceAll("0", "<~?~>");
+  str = str.replaceAll("1", "<~!~>");
   //
   //Replace All-Capsed English Words With Binary Codes
   let leadingSpace = false;
@@ -79,8 +79,8 @@ function convertToBin(str){
   
   let charStart = comms.length;
   //Bring back 1s and 0s
-  str = str.replaceAll("<?>", binary13[charStart]);
-  str = str.replaceAll("<!>", binary13[charStart+1]);
+  str = str.replaceAll("<~?~>", binary13[charStart]);
+  str = str.replaceAll("<~!~>", binary13[charStart+1]);
   
   //Replace Chars With Binary Codes
   for (let i = 2; i < base96.length; i++){
@@ -138,13 +138,7 @@ let extraBytes = ["!", "@", "#", "$", "%", "^", "&", "*", "(", ")", "-", "_", "=
 
 //Shrink Binary
 function convertToBase64(str){
-let newStr = "";
-let byte6 = "";
-let sub = "";
-
-/*
-//if (i+6 < str.length)
-  newStr = str;
+  let newStr = str;
   while (newStr.length % 6 !== 0){
     newStr+= "0";
   };
@@ -152,31 +146,13 @@ let sub = "";
   let newStr2 = newStr;
   newStr = "";
   while (newStr2){
-    newStr+= newStr2.substring(0,6)+"<~REMOVE~>";
-    newStr2 = newStr2.replace(newStr2.substring(0,6)+"<~REMOVE~>","");
+    newStr+= (newStr2.substring(0,6)+"<~R~>");
+    newStr2 = newStr2.replace(newStr2.substring(0,6),"");
   };
   for (let c = 0; c < charArr.length; c++){
-    newStr.replaceAll(binary6[c], charArr[c]);
+    newStr = newStr.replaceAll(binary6[c], charArr[c]);
   };
-  newStr = newStr.replaceAll("<~REMOVE~>", "");*/
-
-  while (str){
-    byte6 = "";
-    byte6 = str.substring(0,6);
-    str = str.replace(byte6, "");
-    while(byte6.length < 6){
-      byte6 = byte6 + "0";
-    };
-    for (let c = 0; c < charArr.length; c++){
-      sub = byte6;
-      sub = sub.replace(binary6[c], charArr[c]);
-      if (sub != byte6){
-        newStr+= sub;
-        sub = "";
-        break;
-      };
-    };
-  };
+  newStr = newStr.replaceAll("<~R~>", "");
   
   //Use the extra bytes
   for (let i = 10; i < 42; i++){
