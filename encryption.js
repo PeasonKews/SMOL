@@ -141,7 +141,6 @@ function encrypt(text, key, nSize){
   let arr = scrambleArr(chars, key);
   let arrPackage = setArr(arr);
   const convChar2Index = arrPackage.convChar2Index;
-  const convChar2IndexR = arrPackage.convChar2IndexR;
   let nonce = "";
   for (let i = 0; i < nSize; i++){
     nonce+= arr[random(0, max-1)];
