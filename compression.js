@@ -1,11 +1,12 @@
-/*Dictionary Compression Algorithm: 
+/*
+Dictionary Compression Algorithm: 
 */
 
-let spaceIndex = comms.length + base96.length - 2;
+let spaceIndex = comms.length + chars.indexOf(" ");
 let noCapIndex = comms.indexOf("<~NOCAP~>");
 let capIndex = comms.indexOf("<~CAPITALIZE~>");
 let noSpaceIndex = comms.indexOf("<~NOSPACE~>");
-let preceding = comms.length+base96.length+capitalizedEnglishWords.length;
+let preceding = comms.length+chars.length+capitalizedEnglishWords.length;
 let preceding2 = preceding - capitalizedEnglishWords.length;
 
 function repeatCase(str, lim){
@@ -16,11 +17,14 @@ function repeatCase(str, lim){
   return newStr;
 };
 
-//Compress Base96
+//Compress Chars
 function convertToBin(str){
-  //Hide 0s and 1s
+  //Safely Convert 0s and 1s
   str = str.replaceAll("0", "<~?~>");
   str = str.replaceAll("1", "<~!~>");
+  str = str.replaceAll("<~?~>", binary13[allItems.indexOf("0")]);
+  str = str.replaceAll("<~!~>", binary13[allItems.indexOf("1")]);
+  
   //
   //Replace All-Capsed English Words With Binary Codes
   let leadingSpace = false;
@@ -39,28 +43,28 @@ function convertToBin(str){
   //Insert Capitalize Commands
   let capitalizedChar;
   str = ". " + str;
-  for (let c = 36; c < 62; c++){
+  for (let c = 65; c < 90; c++){
     //Grant Exceptions for Uncapitalized Leading Characters
-    str = str.replaceAll(". " + base96[c-26], ". " + binary13[noCapIndex] + base96[c-26]);
-    str = str.replaceAll("? " + base96[c-26], "? " + binary13[noCapIndex] + base96[c-26]);
-    str = str.replaceAll("! " + base96[c-26], "! " + binary13[noCapIndex] + base96[c-26]);
+    str = str.replaceAll(". " + chars[c+32], ". " + binary13[noCapIndex] + chars[c+32]);
+    str = str.replaceAll("? " + chars[c+32], "? " + binary13[noCapIndex] + chars[c+32]);
+    str = str.replaceAll("! " + chars[c+32], "! " + binary13[noCapIndex] + chars[c+32]);
     
     //Capitalize All Summoned Characters
-    capitalizedChar = binary13[capIndex]+base96[c-26];
-    str = str.replaceAll(base96[c], capitalizedChar);
+    capitalizedChar = binary13[capIndex]+chars[c+32];
+    str = str.replaceAll(chars[c], capitalizedChar);
     
     //Reject Capitalizations At Start of Sentence and Message
-    str = str.replaceAll(".  " + capitalizedChar, ".  " + base96[c-26]);
-    str = str.replaceAll(". " + capitalizedChar, ". " + base96[c-26]);
-    str = str.replaceAll("? " + capitalizedChar, "? " + base96[c-26]);
-    str = str.replaceAll("! " + capitalizedChar, "! " + base96[c-26]);
+    str = str.replaceAll(".  " + capitalizedChar, ".  " + chars[c+32]);
+    str = str.replaceAll(". " + capitalizedChar, ". " + chars[c+32]);
+    str = str.replaceAll("? " + capitalizedChar, "? " + chars[c+32]);
+    str = str.replaceAll("! " + capitalizedChar, "! " + chars[c+32]);
   };
   str = str.substring(2);
   
   //Replace English Words With Binary Codes
   leadingSpace = false;
   if (str.substring(0,1) === " ") leadingSpace = true;
-  for (let w = englishWords.length - 2; w > 0; w--){
+  for (let w = englishWords.length - 2; w >= 0; w--){
     if (!str.includes(englishWords[w])) continue;
     str = str.replaceAll(" " + englishWords[w], binary13[w+preceding]);
     str = str.replaceAll(englishWords[w], binary13[noSpaceIndex]+binary13[w+preceding]);
@@ -77,21 +81,17 @@ function convertToBin(str){
     str = str.replaceAll(suffx[i], binary13[preceding+englishWords.length+i]);
   };
   
-  let charStart = comms.length;
-  //Bring back 1s and 0s
-  str = str.replaceAll("<~?~>", binary13[charStart]);
-  str = str.replaceAll("<~!~>", binary13[charStart+1]);
-  
   //Replace Chars With Binary Codes
-  for (let i = 2; i < base96.length; i++){
-   if (!str.includes(base96[i])) continue;
-    str = str.replaceAll(base96[i], binary13[charStart+i]);
+  let charStart = comms.length;
+  for (let i = 0; i < chars.length; i++){
+   if (!str.includes(chars[i]) || chars[i] === "0" || chars[i] === "1") continue;
+    str = str.replaceAll(chars[i], binary13[charStart+i]);
   };
   return str;
 };
 
 //Decompress Binary
-function convertToBase96(str){
+function convertTochars(str){
   let byte13 = "";
   let sub = "";
   let newStr = "";
@@ -105,8 +105,8 @@ function convertToBase96(str){
       while (byte13.length < 13) byte13+= "0";
     };    
     ind = convBin2Index[byte13].index*1;
-    if ((ind > preceding && ind < preceding + englishWords.length) || 
-    ind > preceding2 && ind < preceding2 + capitalizedEnglishWords.length){
+    if ((ind >= preceding && ind < preceding + englishWords.length) || 
+    ind >= preceding2 && ind < preceding2 + capitalizedEnglishWords.length){
     newStr+= " " + convBin2Text[byte13].text;
     } else {
       newStr+= convBin2Text[byte13].text;
@@ -118,68 +118,55 @@ function convertToBase96(str){
     newStr = ". " + newStr;
     newStr = newStr.replaceAll("<~NOSPACE~> ", "");
     let capitalize = "<~CAPITALIZE~>";
-    for (let l = 10; l < 36; l++){
-      newStr = newStr.replaceAll(capitalize +" "+base96[l], base96[l+26]);
-      newStr = newStr.replaceAll(capitalize + base96[l], base96[l+26]);
+    for (let l = 97; l < 122; l++){
+      newStr = newStr.replaceAll(capitalize +" "+chars[l], chars[l-32]);
+      newStr = newStr.replaceAll(capitalize + chars[l], chars[l-32]);
       //Grant Capitalizations At Start of Sentence
-        newStr = newStr.replaceAll(".  " + base96[l], ".  " + base96[l+26]);
-        newStr = newStr.replaceAll(". " + base96[l], ". " + base96[l+26]);
-        newStr = newStr.replaceAll("? " + base96[l], "? " + base96[l+26]);
-        newStr = newStr.replaceAll("! " + base96[l], "! " + base96[l+26]);
+        newStr = newStr.replaceAll(".  " + chars[l], ".  " + chars[l-32]);
+        newStr = newStr.replaceAll(". " + chars[l], ". " + chars[l-32]);
+        newStr = newStr.replaceAll("? " + chars[l], "? " + chars[l-32]);
+        newStr = newStr.replaceAll("! " + chars[l], "! " + chars[l-32]);
     };
     newStr = newStr.substring(2);
     newStr = newStr.replaceAll("<~NOCAP~>", "");
   return newStr;
 };
 
-let charArr = ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", "n", "o", "p", "q", "r", "s", "t", "u", "v", "w", "x", "y", "z", "A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z", "`", "~"];
-
-let extraBytes = ["!", "@", "#", "$", "%", "^", "&", "*", "(", ")", "-", "_", "=", "+", "[", "{", "]", "}", "\\", "|", ";", ":", "'", "\"", ",", "<", ".", ">", "/", "?", " ", "	"];
-
 //Shrink Binary
 function convertToBase64(str){
   let newStr = str;
-  while (newStr.length % 6 !== 0){
+  while (newStr.length % 7 !== 0){
     newStr+= "0";
   };
   let len = newStr.length;
   let newStr2 = newStr;
   newStr = "";
   while (newStr2){
-    newStr+= (newStr2.substring(0,6)+"<~R~>");
-    newStr2 = newStr2.replace(newStr2.substring(0,6),"");
+    newStr+= (newStr2.substring(0,7)+"<~R~>");
+    newStr2 = newStr2.replace(newStr2.substring(0,7),"");
   };
-  for (let c = 0; c < charArr.length; c++){
-    newStr = newStr.replaceAll(binary6[c], charArr[c]);
+  for (let c = 0; c < chars.length; c++){
+    newStr = newStr.replaceAll(binary7[c], chars[c]);
   };
   newStr = newStr.replaceAll("<~R~>", "");
-  
-  //Use the extra bytes
-  for (let i = 10; i < 42; i++){
-    newStr = newStr.replaceAll("0"+charArr[i], extraBytes[i-10]);
-  };
 return newStr;
 };
 
 //Shrink Binary
 function decompressBase64(str){
 let newStr = "";
-let byte6 = "";
+let byte7 = "";
 let sub = "";
-//Use the extra bytes first
-  for (let i = 10; i < 42; i++){
-    str = str.replaceAll(extraBytes[i-10], "0"+charArr[i]);
-  };
   while (str){
     sub = "";
     sub = str.substring(0,1);
     str = str.replace(sub, "");
-    for (let c = 0; c < charArr.length; c++){
-      byte6 = sub;
-      byte6 = byte6.replace(charArr[c], binary6[c]);
-      if (sub != byte6){
-        newStr+= byte6;
-        byte6 = "";
+    for (let c = 0; c < chars.length; c++){
+      byte7 = sub;
+      byte7 = byte7.replace(chars[c], binary7[c]);
+      if (sub != byte7){
+        newStr+= byte7;
+        byte7 = "";
         break;
       };
     };
@@ -190,21 +177,21 @@ return newStr;
 function decompress(str){
   if (!str) return false;
   str = decompressBase64(str);
-  str = convertToBase96(str);
+  str = convertTochars(str);
   return str;
 };
 
 function compress(str){
   str = convertToBin(str);
-  
   /*//Test
   let testStr = str;
   console.log(testStr)
   while (testStr){
     console.log(testStr.substring(0,13), convBin2Text[testStr.substring(0,13)].text);
     testStr = testStr.substring(13);
-  };
-  */
+  };*/
+  
+  //console.log(binary13[allItems.length])
 
   str = convertToBase64(str);
   return str;

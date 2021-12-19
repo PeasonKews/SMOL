@@ -2,6 +2,12 @@ function byteCount(s) {
     return encodeURI(s).split(/%(?:u[0-9A-F]{2})?[0-9A-F]{2}|./).length - 1;
 };
 
+function textToBinary(string) { 
+  return string.split('').map(function (char) { 
+    return char.charCodeAt(0).toString(2); 
+  }).join(' '); 
+};
+
 function SMOL(str, dir, key, nSize){
   if (nSize == null) nSize = 2;
   if (dir >= 1){
