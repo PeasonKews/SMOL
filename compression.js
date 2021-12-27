@@ -196,17 +196,7 @@ function decompress(str, key, nSize){
 };
 
 function compress(str, key, nSize){
-  str = convertToBin(str);
-  /*//Test
-  let testStr = str;
-  console.log(testStr)
-  while (testStr){
-    console.log(testStr.substring(0,13), convBin2Text[testStr.substring(0,13)].text);
-    testStr = testStr.substring(13);
-  };*/
-  
-  //console.log(binary13[allItems.length])
-  
+  str = convertToBin(str);  
   str = convertToBase64(str);
   if (key){
     key = formatKey(key);
