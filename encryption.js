@@ -2,12 +2,14 @@
 Rotational Encryption Algorithm
 */
 
+let max = base64.length;
+
 function setArr(arr){
   let charIndx = [];
   let charIndxR = [];
-    for (let i = 0; i < chars.length; i++){
+    for (let i = 0; i < base64.length; i++){
       charIndx[i] = i;
-      charIndxR[i] = (chars.length - 1) - i;
+      charIndxR[i] = (base64.length - 1) - i;
     };
   let arrPackage = {
   
@@ -135,7 +137,7 @@ function scrambleArr(arr, key){
 };
 
 function encrypt(text, key, nSize){
-  let arr = scrambleArr(chars, key);
+  let arr = scrambleArr(base64, key);
   let arrPackage = setArr(arr);
   const convChar2Index = arrPackage.convChar2Index;
   let nonce = "";
@@ -150,7 +152,7 @@ function encrypt(text, key, nSize){
 };
 
 function decrypt(text, key, nSize){
-  let arr = scrambleArr(chars, key);
+  let arr = scrambleArr(base64, key);
   let arrPackage = setArr(arr);
   const convChar2Index = arrPackage.convChar2Index;
   const convChar2IndexR = arrPackage.convChar2IndexR;
