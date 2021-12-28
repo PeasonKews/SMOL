@@ -8,11 +8,11 @@ message = "A purely peer-to-peer version of electronic cash would allow online p
 let pass = "password";
 
 console.time("Compressed and Encrypted");
-let ciphertext = compress(message, pass, 0);
+let ciphertext = SMOL_Encode(message, pass, 0);
 console.timeEnd("Compressed and Encrypted");
 
 console.time("Decompressed and Decrypted");
-let plaintext = decompress(ciphertext, pass, 0);
+let plaintext = SMOL_Decode(ciphertext, pass, 0);
 console.timeEnd("Decompressed and Decrypted");
 console.log("\n");
 
