@@ -1,43 +1,30 @@
-function byteCount(s) {
-    return encodeURI(s).split(/%(?:u[0-9A-F]{2})?[0-9A-F]{2}|./).length - 1;
-};
-
-let message = "Hello world";
-message = "A purely peer-to-peer version of electronic cash would allow online payments to be sent directly from one party to another without going through a financial institution. Digital signatures provide part of the solution, but the main benefits are lost if a trusted third party is still required to prevent double-spending. We propose a solution to the double-spending problem using a peer-to-peer network. The network timestamps transactions by hashing them into an ongoing chain of hash-based proof-of-work, forming a record that cannot be changed without redoing the proof-of-work. The longest chain not only serves as proof of the sequence of events witnessed, but proof that it came from the largest pool of CPU power. As long as a majority of CPU power is controlled by nodes that are not cooperating to attack the network, they'll generate the longest chain and outpace attackers. The network itself requires minimal structure. Messages are broadcast on a best effort basis, and nodes can leave and rejoin the network at will, accepting the longest proof-of-work chain as proof of what happened while they were gone."
-//message = "Hello there";
+let language = "english";
+let version = "auto";
+let nonceSize = 0;
+let log = true;
+let message = "A purely peer-to-peer version of electronic cash would allow online payments to be sent directly from one party to another without going through a financial institution. Digital signatures provide part of the solution, but the main benefits are lost if a trusted third party is still required to prevent double-spending. We propose a solution to the double-spending problem using a peer-to-peer network. The network timestamps transactions by hashing them into an ongoing chain of hash-based proof-of-work, forming a record that cannot be changed without redoing the proof-of-work. The longest chain not only serves as proof of the sequence of events witnessed, but proof that it came from the largest pool of CPU power. As long as a majority of CPU power is controlled by nodes that are not cooperating to attack the network, they'll generate the longest chain and outpace attackers. The network itself requires minimal structure. Messages are broadcast on a best effort basis, and nodes can leave and rejoin the network at will, accepting the longest proof-of-work chain as proof of what happened while they were gone."
 let pass = "password";
 
+if (log){
 console.time("Compressed and Encrypted");
-let ciphertext = SMOL_Encode(message, pass, 0);
+let ciphertext = SMOL_Encode(message, language, version, pass, nonceSize);
 console.timeEnd("Compressed and Encrypted");
 
 console.time("Decompressed and Decrypted");
-let plaintext = SMOL_Decode(ciphertext, pass, 0);
+let plaintext = SMOL_Decode(ciphertext, pass, nonceSize);
 console.timeEnd("Decompressed and Decrypted");
 console.log("\n");
+let a = "hi"
+console.log("Ciphertext:  " + ciphertext +  " %c" + byteCount(ciphertext) + " (Base-64)", "color: green");
+console.log("Decrypted:  \n" + plaintext +  " %c" + byteCount(plaintext) + " (UTF-8)", "color: green");
+console.log("Successful:  ", (message === plaintext));
+console.log("Bytes Saved: ", Math.round((1-byteCount(ciphertext)/byteCount(plaintext))*100)+"%");
+console.log("Prefix (" + ciphertext.substring(0,3) + "):", readPrefix(ciphertext))
+};
 
-console.log("ciphertext: ", ciphertext, byteCount(ciphertext));
-console.log("Decrypted:  ", plaintext, byteCount(plaintext));
-console.log("Successful: ", (message === plaintext));
-console.log("Bytes Saved:", Math.round((1-byteCount(ciphertext)/byteCount(plaintext))*100)+"%");
+//analyzeBin(message,language,version)
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+console.log(allItems.length, "out of 8192")
 
 
 
