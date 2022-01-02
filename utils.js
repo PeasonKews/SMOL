@@ -1,11 +1,8 @@
 //Create List
   let arr = [
+    
+       ];
   
-  ];
-  
-  for (let i = 0; i < arr.length; i++){
-    if (arr[i].includes(" ")) arr[i] = "remove";
-  };
 
   //remove duplicates
   arr = arr.filter((c,index) => {

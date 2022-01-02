@@ -12,7 +12,7 @@ let convBin2Text = allItemsPackage.convBin2Text;
 let convBin2Index = allItemsPackage.convBin2Index;
 
 let spaceIndex = comms.length + allChars.indexOf(" ");
-let noCapIndex = comms.indexOf("<~NOCAP~>");
+let utfCharIndex = comms.indexOf("<~UTF-CHAR~>");
 let capIndex = comms.indexOf("<~CAPITALIZE~>");
 let noSpaceIndex = comms.indexOf("<~NOSPACE~>");
 let apostropheNoSpaceIndex = comms.indexOf("<~ApostropheNoSpace~>");
@@ -24,6 +24,28 @@ function repeatCase(str, lim){
   let newStr = "";
   for (i = 0; i < lim; i++){
     newStr+= str;
+  };
+  return newStr;
+};
+
+function checkMultibytes(str, l, v){
+  let newStr = "";
+  let emojis = prefixType[l].version[v].emojis;
+  while (str){
+    if (allChars.indexOf(str.substring(0,1)) === -1){
+      for (let j = 0; j < emojis.length; j++){
+        if (str.substring(0,2) === emojis[j] || str.substring(0,1) === emojis[j]){
+          newStr+= binary13[utfCharIndex]+binary13[j];
+          if (str.substring(0,2) === emojis[j]) str = str.substring(2);
+          if (str.substring(0,1) === emojis[j]) str = str.substring(1);
+          break;
+        };
+      };
+      
+    } else {
+      newStr+= str.substring(0,1);
+      str = str.substring(1);
+    };
   };
   return newStr;
 };
@@ -46,6 +68,13 @@ function convertToBin(str, l, v){
   str = str.replaceAll("<~?~>", binary13[allItems.indexOf("0")]);
   str = str.replaceAll("<~!~>", binary13[allItems.indexOf("1")]);
   
+  //Convert Multibytes
+  str = checkMultibytes(str, l, v);
+  
+  str = ". " + str;
+  
+
+  
   //Replace All-Capsed English Words With Binary Codes
   let leadingSpace = false;
   if (str.substring(0,1) === " ") leadingSpace = true;
@@ -62,12 +91,13 @@ function convertToBin(str, l, v){
   };
   //Insert Capitalize Commands
   let capitalizedChar;
-  str = ". " + str;
+  let cappy = "0202020";
   for (let c = 36; c < 62; c++){
-    //Grant Exceptions for Uncapitalized Leading Characters
-    str = str.replaceAll(". " + allChars[c-26], ". " + binary13[noCapIndex] + allChars[c-26]);
-    str = str.replaceAll("? " + allChars[c-26], "? " + binary13[noCapIndex] + allChars[c-26]);
-    str = str.replaceAll("! " + allChars[c-26], "! " + binary13[noCapIndex] + allChars[c-26]);
+    //Grant Exceptions for Uncapitalized Leading Characters   
+    str = str.replaceAll(".  " + allChars[c-26], ".  " + cappy + allChars[c-26]);
+    str = str.replaceAll(". " + allChars[c-26], ". " + cappy + allChars[c-26]);
+    str = str.replaceAll("? " + allChars[c-26], "? " + cappy + allChars[c-26]);
+    str = str.replaceAll("! " + allChars[c-26], "! " + cappy + allChars[c-26]);
     
     //Capitalize All Summoned Characters
     capitalizedChar = binary13[capIndex]+allChars[c-26];
@@ -78,8 +108,10 @@ function convertToBin(str, l, v){
     str = str.replaceAll(". " + capitalizedChar, ". " + allChars[c-26]);
     str = str.replaceAll("? " + capitalizedChar, "? " + allChars[c-26]);
     str = str.replaceAll("! " + capitalizedChar, "! " + allChars[c-26]);
+    
+    str = str.replace(cappy, binary13[capIndex]);
   };
-  str = str.substring(2);
+  if (str.substring(0,2) === ". ") str = str.substring(2);
   
   //Replace English Words With Binary Codes
   leadingSpace = false;
@@ -141,12 +173,19 @@ function convertToText(str, l, v){
     if (byte13.length < 13) break;
       while (byte13.length < 13) byte13+= "0";
     };    
-    ind = convBin2Index[byte13].index*1;
-    if ((ind >= preceding && ind < preceding + englishWords.length) || 
-    (ind >= preceding2 && ind < preceding2 + capitalizedEnglishWords.length)){
-    newStr+= " " + convBin2Text[byte13].text;
+    if (convBin2Text[byte13].text === "<~UTF-CHAR~>"){
+      let emojis = prefixType[l].version[v].emojis;
+      byte13 = str.substring(0,13);
+      str = str.replace(byte13, "");
+      newStr+= emojis[binary13.indexOf(byte13)];
     } else {
-      newStr+= convBin2Text[byte13].text;
+      ind = convBin2Index[byte13].index*1;
+      if ((ind >= preceding && ind < preceding + englishWords.length) || 
+      (ind >= preceding2 && ind < preceding2 + capitalizedEnglishWords.length)){
+      newStr+= " " + convBin2Text[byte13].text;
+      } else {
+        newStr+= convBin2Text[byte13].text;
+      };
     };
   };
   if (newStr.substring(0,1) === " ") newStr = newStr.substring(1);
@@ -158,16 +197,22 @@ function convertToText(str, l, v){
     newStr = newStr.replaceAll("<~NOSPACE~> ", "");
     let capitalize = "<~CAPITALIZE~>";
     for (let l = 10; l < 36; l++){
+      //leading uncapitalized
+      newStr = newStr.replaceAll(". " + capitalize + allChars[l], ".0 " + allChars[l]);
+      newStr = newStr.replaceAll(". " + capitalize + " " + allChars[l], " "+allChars[l]);
+      
+      //normal
       newStr = newStr.replaceAll(capitalize +" "+allChars[l], " "+allChars[l+26]);
       newStr = newStr.replaceAll(capitalize + allChars[l], allChars[l+26]);
+      
       //Grant Capitalizations At Start of Sentence
         newStr = newStr.replaceAll(".  " + allChars[l], ".  " + allChars[l+26]);
         newStr = newStr.replaceAll(". " + allChars[l], ". " + allChars[l+26]);
         newStr = newStr.replaceAll("? " + allChars[l], "? " + allChars[l+26]);
         newStr = newStr.replaceAll("! " + allChars[l], "! " + allChars[l+26]);
     };
-    newStr = newStr.substring(2);
-    newStr = newStr.replaceAll("<~NOCAP~>", "");
+    newStr = newStr.replaceAll(".0 ", ". ");
+    if (newStr.substring(0,2) === ". ") newStr = newStr.substring(2);
   return newStr;
 };
 
@@ -253,17 +298,58 @@ function readPrefix(str){
   return prefix;
 };
 
-function SMOL_Decode(str, key, nSize){
-  if (!str) return false;
-  let prefix = readPrefix(str);
-  str = str.substring(3);
-  if (key && prefix.encrypted) {
-    key = formatKey(key);
-    str = decrypt(str, key, nSize);
+function convertUTF8ToBase64(str, l, v){
+  let emojis = prefixType[1].version[0].emojis;
+  str = str.replaceAll("0", "<~?~>");
+  str = str.replaceAll("1", "<~!~>");
+  str = str.replaceAll("<~?~>", binary7[chars7.indexOf("0")]);
+  str = str.replaceAll("<~!~>", binary7[chars7.indexOf("1")]);
+  for (let i = chars7.length - 1; i >= 2; i--){
+    str = str.replaceAll(chars7[i], binary7[i]);
   };
-  str = decompressBase64(str);
-  str = convertToText(str, prefix.language, prefix.version);
+  for (let i = 0; i < emojis.length; i++){
+    str = str.replaceAll(emojis[i], binary7[127]+binary13[i]);
+  };
+  str = convertToBase64(str);
   return str;
+};
+
+function convertBase64ToUTF8(str, l, v){
+let emojis = prefixType[1].version[0].emojis;
+let newStr = "";
+let byte6 = "";
+let sub = "";
+  while (str){
+    sub = "";
+    sub = str.substring(0,1);
+    str = str.replace(sub, "");
+    for (let c = 0; c < base64.length; c++){
+      byte6 = sub;
+      byte6 = byte6.replace(base64[c], binary6[c]);
+      if (sub != byte6){
+        newStr+= byte6;
+        byte6 = "";
+        break;
+      };
+    };
+  };
+  str = newStr;
+  newStr = "";
+  let temp = "";
+  while (str) {
+    temp = str.substring(0,7);
+    if (temp.length < 7) break;
+    if (temp === "1111111"){
+      str = str.substring(7);
+      newStr+= emojis[binary13.indexOf(str.substring(0,13))];
+      str = str.substring(13);      
+    } else {
+      newStr+= chars7[binary7.indexOf(temp)];
+      str = str.substring(7);
+    };
+  };
+  str = newStr;
+  return str;  
 };
 
 function interpretLang(l){
@@ -278,7 +364,26 @@ function interpretLang(l){
   return l;
 };
 
+function SMOL_Decode(str, key, nSize){
+  if (!str) return false;
+  let prefix = readPrefix(str);
+  str = str.substring(3);
+  if (key && prefix.encrypted) {
+    key = formatKey(key);
+    str = decrypt(str, key, nSize);
+  };
+  if (prefix.language > 0){
+    str = decompressBase64(str);
+    str = convertToText(str, prefix.language, prefix.version);
+  } else {
+    if (key && prefix.encrypted) str = convertBase64ToUTF8(str, prefix.language, prefix.version);
+  };
+  return str;
+};
+
 function SMOL_Encode(str, l, v, key, nSize){
+  let ogString = str;
+  let ogKey = key;
   if (v === "auto") v = vers;
   l = interpretLang(l);
   str = convertToBin(str, l, v);  
@@ -287,6 +392,30 @@ function SMOL_Encode(str, l, v, key, nSize){
     key = formatKey(key);
     str = encrypt(str, key, nSize);
   };
-  str = formatPrefix(str, key, 1, 0);
+  str = formatPrefix(str, key, l, v);
+  let checkString = SMOL_Decode(str, ogKey, nSize);
+  if (checkString !== ogString || str.length > ogString.length){
+    str = ogString;
+    if (key){
+      str = convertUTF8ToBase64(ogString, l, v);
+      key = formatKey(ogKey);
+      str = encrypt(str, key, nSize);
+    };
+    str = formatPrefix(str, key, 0, 0);
+  };
   return str;
 };
+
+
+
+
+
+
+
+
+
+
+
+
+
+
