@@ -364,8 +364,19 @@ function interpretLang(l){
   return l;
 };
 
+function checkStrForAnomalies(str, l, v){
+  let everyChar = chars.concat(prefixType[l].version[v].emojis);
+  for (let i = 0; i < str.length; i++){
+    if (everyChar.indexOf(str.substring(i,i+1)) === -1){
+    console.log("\""+str.substring(i,i+1)+"\" is not in the dictionary. Please make a pull request to add it at https://github.com/j-stodd/SMOL. Alternatively, try removing that character and trying again."); 
+    return false;
+    };
+  };
+  return true;
+};
+
 function SMOL_Decode(str, key, nSize){
-  if (!str) return false;
+  if (!str || str === "error") return false;
   let prefix = readPrefix(str);
   str = str.substring(3);
   if (key && prefix.encrypted) {
@@ -386,6 +397,8 @@ function SMOL_Encode(str, l, v, key, nSize){
   let ogKey = key;
   if (v === "auto") v = vers;
   l = interpretLang(l);
+  let cleared = checkStrForAnomalies(str, l , v);
+  if (!cleared) return "error";
   str = convertToBin(str, l, v);  
   str = convertToBase64(str);
   if (key){
