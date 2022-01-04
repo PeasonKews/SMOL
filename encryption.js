@@ -57,6 +57,10 @@ function swap(str, a, b){
   return str;
 };
 
+function reverseString(str) {
+  return str.split("").reverse().join("");
+};
+
 function shuffle(text, key, arr, convChar2Index) {
   let shift = 0;
   let keyVal = 0;
@@ -136,6 +140,28 @@ function scrambleArr(arr, key){
   return newArr;
 };
 
+function shakeUp(text, arr, convChar2Index){
+  let piece1 = text.substring(0,Math.floor(text.length/2));
+  let piece2 = text.substring(Math.floor(text.length/2),text.length);
+  piece1 = rotate(piece1, piece2, arr, convChar2Index);
+  piece1 = shuffle(piece1, piece2, arr, convChar2Index);
+  piece2 = rotate(piece2, piece1, arr, convChar2Index);
+  piece2 = shuffle(piece2, piece1, arr, convChar2Index);
+  text = piece1+piece2;
+  return text;
+};
+
+function unShake(text, arr, convChar2Index, convChar2IndexR){
+  let piece1 = text.substring(0,Math.floor(text.length/2));
+  let piece2 = text.substring(Math.floor(text.length/2),text.length);
+  piece2 = unshuffle(piece2, piece1, arr, convChar2Index);
+  piece2 = unrotate(piece2, piece1, arr, convChar2Index, convChar2IndexR);
+  piece1 = unshuffle(piece1, piece2, arr, convChar2Index);
+  piece1 = unrotate(piece1, piece2, arr, convChar2Index, convChar2IndexR);
+  text = piece1+piece2;
+  return text;
+};
+
 function encrypt(text, key, nSize){
   let arr = scrambleArr(base64, key);
   let arrPackage = setArr(arr);
@@ -145,6 +171,7 @@ function encrypt(text, key, nSize){
     nonce+= arr[random(0, max-1)];
   };
   let nKey = nonce + key + "";
+  text = shakeUp(text, arr, convChar2Index);
   text = rotate(text, nKey, arr, convChar2Index);
   text = nonce + text;
   text = shuffle(text, key, arr, convChar2Index);
@@ -161,5 +188,6 @@ function decrypt(text, key, nSize){
   text = text.substring(nSize);
   let nKey = nonce + key + "";
   text = unrotate(text, nKey, arr, convChar2Index, convChar2IndexR);
+  text = unShake(text, arr, convChar2Index, convChar2IndexR);
   return text;
 };
