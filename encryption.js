@@ -140,25 +140,35 @@ function scrambleArr(arr, key){
   return newArr;
 };
 
-function shakeUp(text, arr, convChar2Index){
-  let piece1 = text.substring(0,Math.floor(text.length/2));
-  let piece2 = text.substring(Math.floor(text.length/2),text.length);
-  piece1 = rotate(piece1, piece2, arr, convChar2Index);
-  piece1 = shuffle(piece1, piece2, arr, convChar2Index);
-  piece2 = rotate(piece2, piece1, arr, convChar2Index);
-  piece2 = shuffle(piece2, piece1, arr, convChar2Index);
-  text = piece1+piece2;
+function shakeUp(text, key, arr, convChar2Index){
+  let piece1;
+  let piece2;
+  for (let i = 0; i < 2; i++){
+    piece1 = text.substring(0,Math.floor(text.length/2));
+    piece2 = text.substring(Math.floor(text.length/2),text.length);
+    piece1 = rotate(piece1, piece2, arr, convChar2Index);
+    piece1 = shuffle(piece1, piece2, arr, convChar2Index);
+    piece2 = rotate(piece2, piece1, arr, convChar2Index);
+    piece2 = shuffle(piece2, piece1, arr, convChar2Index);
+    text = piece1+piece2;
+    text = shuffle(text, key, arr, convChar2Index);
+    }; 
   return text;
 };
 
-function unShake(text, arr, convChar2Index, convChar2IndexR){
-  let piece1 = text.substring(0,Math.floor(text.length/2));
-  let piece2 = text.substring(Math.floor(text.length/2),text.length);
-  piece2 = unshuffle(piece2, piece1, arr, convChar2Index);
-  piece2 = unrotate(piece2, piece1, arr, convChar2Index, convChar2IndexR);
-  piece1 = unshuffle(piece1, piece2, arr, convChar2Index);
-  piece1 = unrotate(piece1, piece2, arr, convChar2Index, convChar2IndexR);
-  text = piece1+piece2;
+function unShake(text, key, arr, convChar2Index, convChar2IndexR){
+  let piece1;
+  let piece2;
+  for (let i = 0; i < 2; i++){
+    text = unshuffle(text, key, arr, convChar2Index);
+    let piece1 = text.substring(0,Math.floor(text.length/2));
+    let piece2 = text.substring(Math.floor(text.length/2),text.length);
+    piece2 = unshuffle(piece2, piece1, arr, convChar2Index);
+    piece2 = unrotate(piece2, piece1, arr, convChar2Index, convChar2IndexR);
+    piece1 = unshuffle(piece1, piece2, arr, convChar2Index);
+    piece1 = unrotate(piece1, piece2, arr, convChar2Index, convChar2IndexR);
+    text = piece1+piece2;
+  };
   return text;
 };
 
@@ -171,7 +181,7 @@ function encrypt(text, key, nSize){
     nonce+= arr[random(0, max-1)];
   };
   let nKey = nonce + key + "";
-  text = shakeUp(text, arr, convChar2Index);
+  text = shakeUp(text, nKey, arr, convChar2Index);
   text = rotate(text, nKey, arr, convChar2Index);
   text = nonce + text;
   text = shuffle(text, key, arr, convChar2Index);
@@ -188,6 +198,6 @@ function decrypt(text, key, nSize){
   text = text.substring(nSize);
   let nKey = nonce + key + "";
   text = unrotate(text, nKey, arr, convChar2Index, convChar2IndexR);
-  text = unShake(text, arr, convChar2Index, convChar2IndexR);
+  text = unShake(text, nKey, arr, convChar2Index, convChar2IndexR);
   return text;
 };
